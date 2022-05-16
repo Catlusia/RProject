@@ -39,7 +39,8 @@ wd_indicators_f <- wd_indicators %>%
 #select columns from Composite
 spcomposite_f <- select(spcomposite, Year, Earnings, Real.Price, Real.Dividend, Real.Earnings)
 
-#get year from date
+#change type of Year
+class(spcomposite_f$Year)
 spcomposite_f$Year <- as.Date(spcomposite_f$Year)
 
 #change date to year, filter year
@@ -48,9 +49,24 @@ spcomposite_f <- spcomposite_f %>%
   mutate(spcomposite_f, Year = format(Year, format = "%Y")) %>% 
   filter(Year >= "1979" & Year <= "2020")
 
+#Mean of values by year - 2020 not complete
 spcomposite_f <- group_by(spcomposite_f, Year) %>%
-  summarise(TotalEarnings = sum(Earnings), TotalRealPrice = sum(Real.Price),
-            TotalRealDividend = sum(Real.Dividend), TotalRealEarnings = sum(Real.Earnings))
+  summarise(TotalEarnings = mean(Earnings), TotalRealPrice = mean(Real.Price),
+            TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings))
+
+# ----------------------------------------- Gold Prices --------------------------------------------------
+
+gold_prices_f <- gold_prices %>%
+  select(Date, EURO..AM., EURO..PM.) %>%
+  mutate(Euro = rowMeans(select(., EURO..AM., EURO..PM.), na.rm = TRUE))
+  
+
+class(gold_prices_f$EURO..AM.)
+class(gold_prices_f$EURO..PM.)
+
+
+
+# -------------------------------- Change name of DF columns ---------------------------------------------
 
 #later on final dataframe
 colnames(wd_indicators_f) <- c("Country Name", "Indicator", "1971", "1972", "1973", "1974", "1975", "1976", "1977", "1978",
