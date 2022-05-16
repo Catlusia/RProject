@@ -1,5 +1,11 @@
 install.packages("readxl")
 library("readxl")
+library("ggplot2")
+library("plotly")
+library("dplyr")
+library("knitr")
+library("DT")
+library("readxl")
 
 #import data from files
 gold_prices <- read.csv("Data\\Gold prices.csv")
@@ -27,42 +33,42 @@ wd_indicators_sn <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP
 wd_indicators_cc <- c("AFG", "CAN", "CHL", "CHN", "COL", "CZE", "ETH", "FRA", "DEU", "GHA", "HKG", 
                       "IND", "JPN", "KOR", "NPL", "POL", "QAT", "RUS", "SAU", "USA")
 
-#make a new dataframe with selected values
+#make a new data frame with selected values
 wd_indicators_f <- wd_indicators %>% 
   filter(`Series Code` %in% wd_indicators_sn, `Country Code` %in% wd_indicators_cc) %>% 
   select(-`Country Code`, -`Series Code`, -`1970 [YR1970]`)
 
 # ----------------------------------- S & P Composite ----------------------------------------------------
-
-#select columns from Composite
-spcomposite_f <- select(spcomposite, Year, Earnings, Real.Price, Real.Dividend, Real.Earnings)
-
 #change type of Year
-class(spcomposite_f$Year)
-spcomposite_f$Year <- as.Date(spcomposite_f$Year)
+class(spcomposite$Year)
+spcomposite$Year <- as.Date(spcomposite$Year)
 
 #change date to year, filter year
-spcomposite_f <- spcomposite_f %>% 
+spcomposite_f <- spcomposite %>% 
   select(Year, Earnings, Real.Price, Real.Dividend, Real.Earnings) %>% 
-  mutate(spcomposite_f, Year = format(Year, format = "%Y")) %>% 
+  mutate(spcomposite, Year = format(Year, format = "%Y")) %>% 
+  group_by(Year) %>%
+  summarise(TotalEarnings = mean(Earnings), TotalRealPrice = mean(Real.Price),
+            TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings)) %>%
   filter(Year >= "1979" & Year <= "2020")
 
 #Mean of values by year - 2020 not complete
-spcomposite_f <- group_by(spcomposite_f, Year) %>%
-  summarise(TotalEarnings = mean(Earnings), TotalRealPrice = mean(Real.Price),
-            TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings))
+#spcomposite_f <- group_by(spcomposite_f, Year) %>%
+#  summarise(TotalEarnings = mean(Earnings), TotalRealPrice = mean(Real.Price),
+            #TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings))
 
 # ----------------------------------------- Gold Prices --------------------------------------------------
+#Change character to date
+gold_prices$Date <- as.Date(gold_prices$Date)
 
+#mean from USD A.M. and USD P.M.
 gold_prices_f <- gold_prices %>%
-  select(Date, EURO..AM., EURO..PM.) %>%
-  mutate(Euro = rowMeans(select(., EURO..AM., EURO..PM.), na.rm = TRUE))
-  
-
-class(gold_prices_f$EURO..AM.)
-class(gold_prices_f$EURO..PM.)
-
-
+  select(Date, USD..AM., USD..PM.) %>%
+  mutate(Usd = rowMeans(select(., USD..AM., USD..PM.), na.rm = TRUE)) %>%
+  mutate(gold_prices, Date = format(Date, format = "%Y")) %>%
+  group_by(Date) %>%
+  summarise(GoldPriceinEuro = mean(Usd)) %>%
+  filter(Date >= "1979" & Date <= "2020")
 
 # -------------------------------- Change name of DF columns ---------------------------------------------
 

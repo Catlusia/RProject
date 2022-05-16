@@ -11,13 +11,14 @@ output:
 ---
 
 <!-- 
+Library to install:
 
-Library to install
 - ggplot2
 - plotly
 - dplyr
 - knitr
 - DT
+- readxl
 -->
 
 <!-- Load the libraries -->
@@ -25,7 +26,21 @@ Library to install
 
 
 
-## Wstęp
+<!-- Import Data from Files -->
+
+```r
+gold_prices <- read.csv("Data\\Gold prices.csv")
+currency_ex_rates <- read.csv("Data\\CurrencyExchangeRates.csv")
+s_p_composite <- read.csv("Data\\S&P Composite.csv")
+wd_indicators <- read_excel("Data\\World_Development_Indicators.xlsx")
+bitcoin_metadata <- read.csv("Data\\BCHAIN_metadata.csv")
+bitcoin_diff <- read.csv("Data\\BCHAIN-DIFF.csv")
+bitcoin_hrate <- read.csv("Data\\BCHAIN-HRATE.csv")
+bitcoin_mkpru <- read.csv("Data\\BCHAIN-MKPRU.csv")
+bitcoin_trvou <- read.csv("Data\\BCHAIN-TRVOU.csv")
+```
+
+# Executive summary
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
