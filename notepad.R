@@ -30,7 +30,7 @@ wd_indicators_sn <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP
 #'%ni%' <- Negate("%in%")
 
 #filter vector for countries
-wd_indicators_cc <- c("AFG", "CAN", "CHL", "CHN", "COL", "CZE", "ETH", "FRA", "DEU", "GHA", "HKG", 
+wd_indicators_cc <- c("CAN", "CHL", "CHN", "COL", "CZE", "ETH", "FRA", "DEU", "GHA", "HKG", 
                       "IND", "JPN", "KOR", "NPL", "POL", "QAT", "RUS", "SAU", "USA")
 
 #make a new data frame with selected values
@@ -70,9 +70,19 @@ gold_prices_f <- gold_prices %>%
   summarise(GoldPriceinEuro = mean(Usd)) %>%
   filter(Date >= "1979" & Date <= "2020")
 
+# ----------------------------------- Currency exchange rates---------------------------------------------
+#Change character to date
+currency_ex_rates$Date <- as.Date(currency_ex_rates$Date)
+
+currency_ex_rates_f <- currency_ex_rates %>%
+  select(Date, Canadian.Dollar, Chilean.Peso, Chinese.Yuan, Colombian.Peso, Czech.Koruna, Euro, Indian.Rupee,
+         Japanese.Yen, Korean.Won, Nepalese.Rupee, Polish.Zloty, Qatar.Riyal, Russian.Ruble, Saudi.Arabian.Riyal) %>%
+  mutate(currency_ex_rates, Date = format(Date, format = "%Y"))
+
+
 # -------------------------------- Change name of DF columns ---------------------------------------------
 
-#later on final dataframe
+#later on final data frame
 colnames(wd_indicators_f) <- c("Country Name", "Indicator", "1971", "1972", "1973", "1974", "1975", "1976", "1977", "1978",
                                "1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990",
                                "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000")
