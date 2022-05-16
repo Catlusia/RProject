@@ -70,7 +70,6 @@ gold_prices_f <- gold_prices %>%
   summarise(GoldPriceinEuro = mean(Usd)) %>%
   filter(Date >= "1979" & Date <= "2020")
 
-
 # -------------------------------- Change name of DF columns ---------------------------------------------
 
 #later on final dataframe
