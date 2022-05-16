@@ -76,3 +76,4 @@ colnames(wd_indicators_f) <- c("Country Name", "Indicator", "1971", "1972", "197
 #remove unnecessary filter vectors
 rm(wd_indicators_cc)
 rm(wd_indicators_sn)
+
