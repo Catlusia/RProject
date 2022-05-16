@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ---
 title: "RProject"
 author: "Alicja Kilińska"
@@ -108,4 +107,3 @@ You can also embed plots, for example:
 ![](RProject_files/figure-html/pressure-1.png)<!-- -->
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
->>>>>>> 85f0e6da903b981199c0cf79f6fd92f0ac500246
