@@ -1,5 +1,3 @@
-#serwd
-
 install.packages("readxl")
 library("readxl")
 
