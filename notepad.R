@@ -13,11 +13,13 @@ currency_ex_rates <- read.csv("Data\\CurrencyExchangeRates.csv")
 spcomposite <- read.csv("Data\\S&P Composite.csv")
 wd_indicators <- read_excel("Data\\World_Development_Indicators.xlsx")
 
-bitcoin_metadata <- read.csv("Data\\BCHAIN_metadata.csv")
 bitcoin_diff <- read.csv("Data\\BCHAIN-DIFF.csv")
 bitcoin_hrate <- read.csv("Data\\BCHAIN-HRATE.csv")
 bitcoin_mkpru <- read.csv("Data\\BCHAIN-MKPRU.csv")
 bitcoin_trvou <- read.csv("Data\\BCHAIN-TRVOU.csv")
+
+# Modify global options in R - disable scientific notation
+options(scipen = 999)
 
 # ----------------------------------- Indicators ----------------------------------------------------
 
@@ -40,7 +42,6 @@ wd_indicators_f <- wd_indicators %>%
 
 # ----------------------------------- S & P Composite ----------------------------------------------------
 #change type of Year
-class(spcomposite$Year)
 spcomposite$Year <- as.Date(spcomposite$Year)
 
 #change date to year, filter year
@@ -50,12 +51,12 @@ spcomposite_f <- spcomposite %>%
   group_by(Year) %>%
   summarise(TotalEarnings = mean(Earnings), TotalRealPrice = mean(Real.Price),
             TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings)) %>%
-  filter(Year >= "1979" & Year <= "2020")
+  mutate_if(is.numeric, round, 2) %>%
+  filter(Year >= "1979" & Year <= "2020") %>%
+  arrange(desc(Year))
 
-#Mean of values by year - 2020 not complete
-#spcomposite_f <- group_by(spcomposite_f, Year) %>%
-#  summarise(TotalEarnings = mean(Earnings), TotalRealPrice = mean(Real.Price),
-#TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings))
+spcomposite <- spcomposite_f
+rm(spcomposite_f)
 
 # ----------------------------------------- Gold Prices --------------------------------------------------
 #Change character to date
@@ -68,7 +69,12 @@ gold_prices_f <- gold_prices %>%
   mutate(gold_prices, Date = format(Date, format = "%Y")) %>%
   group_by(Date) %>%
   summarise(GoldPriceinEuro = mean(Usd)) %>%
-  filter(Date >= "1979" & Date <= "2020")
+  mutate(GoldPriceinEuro = round(GoldPriceinEuro, 2)) %>%
+  filter(Date >= "1979" & Date <= "2020") %>%
+  arrange(desc(Date))
+
+gold_prices <- gold_prices_f
+rm(gold_prices_f)
 
 # ----------------------------------- Currency exchange rates---------------------------------------------
 #Change character to date
@@ -77,7 +83,80 @@ currency_ex_rates$Date <- as.Date(currency_ex_rates$Date)
 currency_ex_rates_f <- currency_ex_rates %>%
   select(Date, Canadian.Dollar, Chilean.Peso, Chinese.Yuan, Colombian.Peso, Czech.Koruna, Euro, Indian.Rupee,
          Japanese.Yen, Korean.Won, Nepalese.Rupee, Polish.Zloty, Qatar.Riyal, Russian.Ruble, Saudi.Arabian.Riyal) %>%
-  mutate(currency_ex_rates, Date = format(Date, format = "%Y"))
+  mutate(currency_ex_rates, Date = format(Date, format = "%Y"))  %>%
+  group_by(Date) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  arrange(desc(Date))
+
+currency_ex_rates <- currency_ex_rates_f
+rm(currency_ex_rates_f)
+
+# ------------------------------ mkpru - Bitcoin Market Price USD ----------------------------------------
+
+#change character to date
+bitcoin_mkpru$Date <- as.Date(bitcoin_mkpru$Date)
+
+bitcoin_mkpru_f <- bitcoin_mkpru %>%
+  select(Date, Value) %>%
+  mutate(bitcoin_mkpru, Date = format(Date, format = "%Y")) %>%
+  group_by(Date) %>%
+  summarise(MeanValue = mean(Value)) %>%
+  mutate(MeanValue = round(MeanValue, 2)) %>%
+  filter(Date >= "2010" & Date <= "2020") %>%
+  arrange(desc(Date))
+
+bitcoin_mkpru <- bitcoin_mkpru_f
+rm(bitcoin_mkpru_f)
+
+# ----------------------- trvou - Bitcoin USD Exchange Trade Volume --------------------------------------
+
+#change character to date
+bitcoin_trvou$Date <- as.Date(bitcoin_trvou$Date)
+
+bitcoin_trvou_f <- bitcoin_trvou %>%
+  select(Date, Value) %>%
+  mutate(bitcoin_trvou, Date = format(Date, format = "%Y")) %>%
+  group_by(Date) %>%
+  summarise(MeanValue = mean(Value)) %>%
+  mutate(MeanValue = round(MeanValue, 2)) %>%
+  filter(Date >= "2010" & Date <= "2020") %>%
+  arrange(desc(Date))
+
+bitcoin_trvou <- bitcoin_trvou_f
+rm(bitcoin_trvou_f)
+
+# ----------------------- hrate - Bitcoin Hash Rate --------------------------------------
+
+bitcoin_hrate$Date <- as.Date(bitcoin_hrate$Date)
+
+bitcoin_hrate_f <- bitcoin_hrate %>%
+  select(Date, Value) %>%
+  mutate(bitcoin_hrate, Date = format(Date, format = "%Y")) %>%
+  group_by(Date) %>%
+  summarise(MeanValue = mean(Value)) %>%
+  mutate(MeanValue = round(MeanValue, 2)) %>%
+  filter(Date >= "2010" & Date <= "2020") %>%
+  arrange(desc(Date))
+
+bitcoin_hrate <- bitcoin_hrate_f
+rm(bitcoin_hrate_f)
+
+# ----------------------- diff - Bitcoin Hash Rate --------------------------------------
+
+bitcoin_diff$Date <- as.Date(bitcoin_diff$Date)
+
+bitcoin_diff_f <- bitcoin_diff %>%
+  select(Date, Value) %>%
+  mutate(bitcoin_diff, Date = format(Date, format = "%Y")) %>%
+  group_by(Date) %>%
+  summarise(MeanValue = mean(Value)) %>%
+  mutate(MeanValue = round(MeanValue, 2)) %>%
+  filter(Date >= "2010" & Date <= "2020") %>%
+  arrange(desc(Date))
+
+bitcoin_diff <- bitcoin_diff_f
+rm(bitcoin_diff_f)
 
 # -------------------------------- Change name of DF columns ---------------------------------------------
 
@@ -90,3 +169,4 @@ colnames(wd_indicators_f) <- c("Country Name", "Indicator", "1971", "1972", "197
 #remove unnecessary filter vectors
 rm(wd_indicators_cc)
 rm(wd_indicators_sn)
+rm(bitcoin_mkpru_f)
