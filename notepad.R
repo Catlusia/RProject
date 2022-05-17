@@ -55,7 +55,7 @@ spcomposite_f <- spcomposite %>%
 #Mean of values by year - 2020 not complete
 #spcomposite_f <- group_by(spcomposite_f, Year) %>%
 #  summarise(TotalEarnings = mean(Earnings), TotalRealPrice = mean(Real.Price),
-            #TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings))
+#TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings))
 
 # ----------------------------------------- Gold Prices --------------------------------------------------
 #Change character to date
@@ -87,7 +87,7 @@ colnames(wd_indicators_f) <- c("Country Name", "Indicator", "1971", "1972", "197
                                "1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990",
                                "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000")
 
+
 #remove unnecessary filter vectors
 rm(wd_indicators_cc)
 rm(wd_indicators_sn)
-
