@@ -79,7 +79,6 @@ currency_ex_rates_f <- currency_ex_rates %>%
          Japanese.Yen, Korean.Won, Nepalese.Rupee, Polish.Zloty, Qatar.Riyal, Russian.Ruble, Saudi.Arabian.Riyal) %>%
   mutate(currency_ex_rates, Date = format(Date, format = "%Y"))
 
-
 # -------------------------------- Change name of DF columns ---------------------------------------------
 
 #later on final data frame
