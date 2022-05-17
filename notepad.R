@@ -22,7 +22,6 @@ bitcoin_trvou <- read.csv("Data\\BCHAIN-TRVOU.csv")
 options(scipen = 999)
 
 # ----------------------------------- Indicators ----------------------------------------------------
-
 #filter vector for indicators
 wd_indicators_sn <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP.TOTL.FE.IN", 
                       "SP.DYN.LE00.IN", "SL.UEM.TOTL.NE.ZS", "SL.UEM.ADVN.ZS", "SP.DYN.TO65.FE.ZS",
@@ -35,10 +34,17 @@ wd_indicators_sn <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP
 wd_indicators_cc <- c("CAN", "CHL", "CHN", "COL", "CZE", "ETH", "FRA", "DEU", "GHA", "HKG", 
                       "IND", "JPN", "KOR", "NPL", "POL", "QAT", "RUS", "SAU", "USA")
 
+wd_indicators_f <- wd_indicators_f %>% 
+  select(contains("[YR")) %>%
+  mutate_if(is.character, as.numeric) %>% 
+  mutate_if(is.numeric, round, 0)
+
 #make a new data frame with selected values
-wd_indicators_f <- wd_indicators %>% 
+wd_indicators_ff <- wd_indicators %>% 
   filter(`Series Code` %in% wd_indicators_sn, `Country Code` %in% wd_indicators_cc) %>% 
   select(-`Country Code`, -`Series Code`, -`1970 [YR1970]`)
+  
+rm(wd_indicators_f)
 
 # ----------------------------------- S & P Composite ----------------------------------------------------
 #change type of Year
