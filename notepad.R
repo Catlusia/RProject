@@ -23,28 +23,29 @@ options(scipen = 999)
 
 # ----------------------------------- Indicators ----------------------------------------------------
 #filter vector for indicators
-wd_indicators_sn <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP.TOTL.FE.IN", 
+wd_series <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP.TOTL.FE.IN", 
                       "SP.DYN.LE00.IN", "SL.UEM.TOTL.NE.ZS", "SL.UEM.ADVN.ZS", "SP.DYN.TO65.FE.ZS",
                       "SP.DYN.TO65.MA.ZS", "SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5",
                       "SH.STA.DIAB.ZS")
-#wd_indicators_cc <- c("HIC", "UMC", "WLD", "LMY", "LIC", "MIC", "LMC")
+
 #'%ni%' <- Negate("%in%")
 
 #filter vector for countries
-wd_indicators_cc <- c("CAN", "CHL", "CHN", "COL", "CZE", "ETH", "FRA", "DEU", "GHA", "HKG", 
+wd_country <- c("CAN", "CHL", "CHN", "COL", "CZE", "ETH", "FRA", "DEU", "GHA", "HKG", 
                       "IND", "JPN", "KOR", "NPL", "POL", "QAT", "RUS", "SAU", "USA")
 
-wd_indicators_f <- wd_indicators_f %>% 
-  select(contains("[YR")) %>%
-  mutate_if(is.character, as.numeric) %>% 
-  mutate_if(is.numeric, round, 0)
+wd_filter <- c(5:55)
 
-#make a new data frame with selected values
-wd_indicators_ff <- wd_indicators %>% 
-  filter(`Series Code` %in% wd_indicators_sn, `Country Code` %in% wd_indicators_cc) %>% 
+wd_indicators_f <- wd_indicators %>%
+  mutate(replace(wd_indicators, wd_indicators == "..", "0")) %>%
+  mutate_at(wd_filter, as.numeric) %>%
+  mutate_if(is.numeric, round, 1) %>%
+  filter(`Series Code` %in% wd_series, `Country Code` %in% wd_country) %>%
   select(-`Country Code`, -`Series Code`, -`1970 [YR1970]`)
-  
-rm(wd_indicators_f)
+
+wd_indicators <- wd_indicators_f
+
+rm(wd_indicators_f, wd_filter, wd_country, wd_series)
 
 # ----------------------------------- S & P Composite ----------------------------------------------------
 #change type of Year
