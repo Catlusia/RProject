@@ -37,14 +37,22 @@ wd_country <- c("CAN", "CHL", "CHN", "COL", "CZE", "ETH", "FRA", "DEU", "GHA", "
 wd_filter <- c(5:55)
 
 wd_indicators_f <- wd_indicators %>%
+  select(`1995 [YR1995]`:`2018 [YR2018]`)
+
+wd_indicators_f <- wd_indicators %>%
   mutate(replace(wd_indicators, wd_indicators == "..", "0")) %>%
   mutate_at(wd_filter, as.numeric) %>%
   mutate_if(is.numeric, round, 1) %>%
   filter(`Series Code` %in% wd_series, `Country Code` %in% wd_country) %>%
-  select(-`Country Code`, -`Series Code`, -`1970 [YR1970]`)
+  select(`Country Name`', '`1995 [YR1995]`:`2018 [YR2018]`)
+
+wd_indicators$`1995 [YR1995]`:
+
+rm(wd_indicators_f)
 
 wd_indicators <- wd_indicators_f
 
+#remove unnecessary filter vectors
 rm(wd_indicators_f, wd_filter, wd_country, wd_series)
 
 # ----------------------------------- S & P Composite ----------------------------------------------------
@@ -54,15 +62,19 @@ spcomposite$Year <- as.Date(spcomposite$Year)
 #change date to year, filter year
 spcomposite_f <- spcomposite %>% 
   select(Year, Earnings, Real.Price, Real.Dividend, Real.Earnings) %>% 
+  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>%
   mutate(spcomposite, Year = format(Year, format = "%Y")) %>% 
   group_by(Year) %>%
   summarise(TotalEarnings = mean(Earnings), TotalRealPrice = mean(Real.Price),
             TotalRealDividend = mean(Real.Dividend), TotalRealEarnings = mean(Real.Earnings)) %>%
   mutate_if(is.numeric, round, 2) %>%
-  filter(Year >= "1979" & Year <= "2020") %>%
+  filter(Year >= "1995" & Year <= "2018") %>%
   arrange(desc(Year))
 
+#assign to original df
 spcomposite <- spcomposite_f
+
+#remove unnecessary filter vectors
 rm(spcomposite_f)
 
 # ----------------------------------------- Gold Prices --------------------------------------------------
@@ -72,15 +84,19 @@ gold_prices$Date <- as.Date(gold_prices$Date)
 #mean from USD A.M. and USD P.M.
 gold_prices_f <- gold_prices %>%
   select(Date, USD..AM., USD..PM.) %>%
+  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>%
   mutate(Usd = rowMeans(select(., USD..AM., USD..PM.), na.rm = TRUE)) %>%
   mutate(gold_prices, Date = format(Date, format = "%Y")) %>%
   group_by(Date) %>%
   summarise(GoldPriceinEuro = mean(Usd)) %>%
-  mutate(GoldPriceinEuro = round(GoldPriceinEuro, 2)) %>%
-  filter(Date >= "1979" & Date <= "2020") %>%
+  mutate(GoldPriceinEuro = round(GoldPriceinEuro, 1)) %>%
+  filter(Date >= "1995" & Date <= "2018") %>%
   arrange(desc(Date))
 
+#assign to original df
 gold_prices <- gold_prices_f
+
+#remove unnecessary filter vectors
 rm(gold_prices_f)
 
 # ----------------------------------- Currency exchange rates---------------------------------------------
@@ -90,13 +106,17 @@ currency_ex_rates$Date <- as.Date(currency_ex_rates$Date)
 currency_ex_rates_f <- currency_ex_rates %>%
   select(Date, Canadian.Dollar, Chilean.Peso, Chinese.Yuan, Colombian.Peso, Czech.Koruna, Euro, Indian.Rupee,
          Japanese.Yen, Korean.Won, Nepalese.Rupee, Polish.Zloty, Qatar.Riyal, Russian.Ruble, Saudi.Arabian.Riyal) %>%
+  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>%
   mutate(currency_ex_rates, Date = format(Date, format = "%Y"))  %>%
   group_by(Date) %>%
   summarise_if(is.numeric, mean, na.rm = TRUE) %>%
   mutate_if(is.numeric, round, 2) %>%
   arrange(desc(Date))
 
+#assign to original df
 currency_ex_rates <- currency_ex_rates_f
+
+#remove unnecessary filter vectors
 rm(currency_ex_rates_f)
 
 # ------------------------------ mkpru - Bitcoin Market Price USD ----------------------------------------
@@ -110,10 +130,13 @@ bitcoin_mkpru_f <- bitcoin_mkpru %>%
   group_by(Date) %>%
   summarise(MeanValue = mean(Value)) %>%
   mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date >= "2010" & Date <= "2020") %>%
+  filter(Date >= "2010" & Date <= "2018") %>%
   arrange(desc(Date))
 
+#assign to original df
 bitcoin_mkpru <- bitcoin_mkpru_f
+
+#remove unnecessary filter vectors
 rm(bitcoin_mkpru_f)
 
 # ----------------------- trvou - Bitcoin USD Exchange Trade Volume --------------------------------------
@@ -127,10 +150,13 @@ bitcoin_trvou_f <- bitcoin_trvou %>%
   group_by(Date) %>%
   summarise(MeanValue = mean(Value)) %>%
   mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date >= "2010" & Date <= "2020") %>%
+  filter(Date >= "2010" & Date <= "2018") %>%
   arrange(desc(Date))
 
+#assign to original df
 bitcoin_trvou <- bitcoin_trvou_f
+
+#remove unnecessary filter vectors
 rm(bitcoin_trvou_f)
 
 # ----------------------- hrate - Bitcoin Hash Rate --------------------------------------
@@ -143,10 +169,13 @@ bitcoin_hrate_f <- bitcoin_hrate %>%
   group_by(Date) %>%
   summarise(MeanValue = mean(Value)) %>%
   mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date >= "2010" & Date <= "2020") %>%
+  filter(Date >= "2010" & Date <= "2018") %>%
   arrange(desc(Date))
 
+#assign to original df
 bitcoin_hrate <- bitcoin_hrate_f
+
+#remove unnecessary filter vectors
 rm(bitcoin_hrate_f)
 
 # ----------------------- diff - Bitcoin Hash Rate --------------------------------------
@@ -159,10 +188,13 @@ bitcoin_diff_f <- bitcoin_diff %>%
   group_by(Date) %>%
   summarise(MeanValue = mean(Value)) %>%
   mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date >= "2010" & Date <= "2020") %>%
+  filter(Date >= "2010" & Date <= "2018") %>%
   arrange(desc(Date))
 
+#assign to original df
 bitcoin_diff <- bitcoin_diff_f
+
+#remove unnecessary filter vectors
 rm(bitcoin_diff_f)
 
 # -------------------------------- Change name of DF columns ---------------------------------------------
@@ -174,6 +206,3 @@ colnames(wd_indicators_f) <- c("Country Name", "Indicator", "1971", "1972", "197
 
 
 #remove unnecessary filter vectors
-rm(wd_indicators_cc)
-rm(wd_indicators_sn)
-rm(bitcoin_mkpru_f)
