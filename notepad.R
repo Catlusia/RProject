@@ -7,7 +7,6 @@ library("knitr")
 library("DT")
 library("readxl")
 library("tidyverse")
-library("tibble")
 
 #import data from files
 gold_prices <- read.csv("Data\\Gold prices.csv")
@@ -72,15 +71,11 @@ spcomposite_f <- spcomposite %>%
 #assign to original df
 spcomposite <- spcomposite_f
 
-head(spcomposite) %>%
-  rownames_to_column() %>%
-  pivot_longer(, cols = -rowname) %>%
-  pivot_wider(, names_from = rowname) %>%
-  rename("Year" = 1) %>%
-  as.data.frame()
+spcomposite_t <- as.data.frame(t(spcomposite))
 
-spcomposite_t <- spcomposite %>%
-  pivot_wider(names_from = Year)%>%
+  mutate(as.data.frame(t(spcomposite)))
+
+spcomposite_t <- spcomposite_t %>%
   mutate(Country = "World", Series = "S&P Composite") %>%
   select(Country, Series, everything())
 
