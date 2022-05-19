@@ -44,11 +44,7 @@ wd_indicators_f <- wd_indicators %>%
   mutate_at(wd_filter, as.numeric) %>%
   mutate_if(is.numeric, round, 1) %>%
   filter(`Series Code` %in% wd_series, `Country Code` %in% wd_country) %>%
-  select(`Country Name`', '`1995 [YR1995]`:`2018 [YR2018]`)
-
-wd_indicators$`1995 [YR1995]`:
-
-rm(wd_indicators_f)
+  select(`Country Name`, `Series Name`, `1995 [YR1995]`:`2018 [YR2018]`)
 
 wd_indicators <- wd_indicators_f
 
@@ -119,6 +115,14 @@ currency_ex_rates <- currency_ex_rates_f
 #remove unnecessary filter vectors
 rm(currency_ex_rates_f)
 
+# ------------------------------------- Dataframe for Bicoins---- ----------------------------------------
+
+Date <- c("2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", 
+          "2000", "1999", "1998", "1997", "1996", "1995")
+
+MeanValue <- rep("0", 14)
+df <- data.frame(Date, MeanValue)
+
 # ------------------------------ mkpru - Bitcoin Market Price USD ----------------------------------------
 
 #change character to date
@@ -130,11 +134,12 @@ bitcoin_mkpru_f <- bitcoin_mkpru %>%
   group_by(Date) %>%
   summarise(MeanValue = mean(Value)) %>%
   mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date >= "2010" & Date <= "2018") %>%
+  filter(Date <= "2018") %>%
   arrange(desc(Date))
 
 #assign to original df
 bitcoin_mkpru <- bitcoin_mkpru_f
+bitcoin_mkpru <- rbind(bitcoin_mkpru, df)
 
 #remove unnecessary filter vectors
 rm(bitcoin_mkpru_f)
@@ -150,11 +155,12 @@ bitcoin_trvou_f <- bitcoin_trvou %>%
   group_by(Date) %>%
   summarise(MeanValue = mean(Value)) %>%
   mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date >= "2010" & Date <= "2018") %>%
+  filter(Date <= "2018") %>%
   arrange(desc(Date))
 
 #assign to original df
 bitcoin_trvou <- bitcoin_trvou_f
+bitcoin_trvou <- rbind(bitcoin_trvou, df)
 
 #remove unnecessary filter vectors
 rm(bitcoin_trvou_f)
@@ -169,11 +175,12 @@ bitcoin_hrate_f <- bitcoin_hrate %>%
   group_by(Date) %>%
   summarise(MeanValue = mean(Value)) %>%
   mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date >= "2010" & Date <= "2018") %>%
+  filter(Date <= "2018") %>%
   arrange(desc(Date))
 
 #assign to original df
 bitcoin_hrate <- bitcoin_hrate_f
+bitcoin_hrate <- rbind(bitcoin_hrate, df)
 
 #remove unnecessary filter vectors
 rm(bitcoin_hrate_f)
@@ -188,14 +195,15 @@ bitcoin_diff_f <- bitcoin_diff %>%
   group_by(Date) %>%
   summarise(MeanValue = mean(Value)) %>%
   mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date >= "2010" & Date <= "2018") %>%
+  filter(Date <= "2018") %>%
   arrange(desc(Date))
 
 #assign to original df
 bitcoin_diff <- bitcoin_diff_f
+bitcoin_diff <- rbind(bitcoin_diff, df)
 
 #remove unnecessary filter vectors
-rm(bitcoin_diff_f)
+rm(bitcoin_diff_f, df, Date, MeanValue)
 
 # -------------------------------- Change name of DF columns ---------------------------------------------
 
