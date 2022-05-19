@@ -1,4 +1,4 @@
-install.packages("readxl")
+install.packages("tibble")
 library("readxl")
 library("ggplot2")
 library("plotly")
@@ -7,6 +7,7 @@ library("knitr")
 library("DT")
 library("readxl")
 library("tidyverse")
+library("tibble")
 
 #import data from files
 gold_prices <- read.csv("Data\\Gold prices.csv")
@@ -71,6 +72,19 @@ spcomposite_f <- spcomposite %>%
 #assign to original df
 spcomposite <- spcomposite_f
 
+head(spcomposite) %>%
+  rownames_to_column() %>%
+  pivot_longer(, cols = -rowname) %>%
+  pivot_wider(, names_from = rowname) %>%
+  rename("Year" = 1) %>%
+  as.data.frame()
+
+spcomposite_t <- spcomposite %>%
+  pivot_wider(names_from = Year)%>%
+  mutate(Country = "World", Series = "S&P Composite") %>%
+  select(Country, Series, everything())
+
+
 #remove unnecessary filter vectors
 rm(spcomposite_f)
 
@@ -92,6 +106,11 @@ gold_prices_f <- gold_prices %>%
 
 #assign to original df
 gold_prices <- gold_prices_f
+
+gold_prices <- gold_prices %>%
+  pivot_wider(names_from = Date, values_from = GoldPriceinEuro)%>%
+  mutate(Country = "World", Series = "Gold Price in Euro") %>%
+  select(Country, Series, everything())
 
 #remove unnecessary filter vectors
 rm(gold_prices_f)
@@ -122,12 +141,14 @@ Date <- c("2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001",
           "2000", "1999", "1998", "1997", "1996", "1995")
 
 MeanValue <- rep("0", 14)
+MeanValue <- as.numeric(MeanValue)
 df <- data.frame(Date, MeanValue)
 
 # ------------------------------ mkpru - Bitcoin Market Price USD ----------------------------------------
 
 #change character to date
 bitcoin_mkpru$Date <- as.Date(bitcoin_mkpru$Date)
+bitcoin_mkpru$Value <- as.Date(bitcoin_mkpru$Value)
 
 bitcoin_mkpru_f <- bitcoin_mkpru %>%
   select(Date, Value) %>%
@@ -154,6 +175,7 @@ bitcoin_mkpru <- bitcoin_mkpru %>%
 
 #change character to date
 bitcoin_trvou$Date <- as.Date(bitcoin_trvou$Date)
+bitcoin_trvou$Value <- as.Date(bitcoin_trvou$Value)
 
 bitcoin_trvou_f <- bitcoin_trvou %>%
   select(Date, Value) %>%
@@ -179,6 +201,7 @@ bitcoin_trvou <- bitcoin_trvou %>%
 # ----------------------- hrate - Bitcoin Hash Rate --------------------------------------
 
 bitcoin_hrate$Date <- as.Date(bitcoin_hrate$Date)
+bitcoin_hrate$Value <- as.numeric(bitcoin_hrate$Value)
 
 bitcoin_hrate_f <- bitcoin_hrate %>%
   select(Date, Value) %>%
@@ -204,6 +227,7 @@ bitcoin_hrate <- bitcoin_hrate %>%
 # ----------------------- diff - Bitcoin Hash Rate --------------------------------------
 
 bitcoin_diff$Date <- as.Date(bitcoin_diff$Date)
+bitcoin_diff$Value <- as.numeric(bitcoin_diff$Value)
 
 bitcoin_diff_f <- bitcoin_diff %>%
   select(Date, Value) %>%
@@ -223,10 +247,20 @@ rm(bitcoin_diff_f, df, Date, MeanValue)
 
 bitcoin_diff <- bitcoin_diff %>%
   pivot_wider(names_from = Date, values_from = MeanValue) %>%
-  mutate(Country = "World", Series = "Bitcoin Diff") %>%
+  mutate(Country = "World", Series = "Bit coin Diff") %>%
   select(Country, Series, everything())
 
 # -------------------------------- Change name of DF columns ---------------------------------------------
+
+all_data <- rbind(bitcoin_diff, bitcoin_hrate, bitcoin_mkpru, bitcoin_trvou, gold_prices)
+all_data <- all_data %>%
+  mutate_if(is.character, as.numeric) %>%
+  mutate_all(round,1)
+
+
+
+summary(all_data)
+rm(bitcoin)
 
 #change column  names on df wd_indicators
 colnames(wd_indicators) <- c("Country", "Series", "1995", "1996", "1997", "1998", "1999", "2000", "2001",
