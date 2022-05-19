@@ -6,6 +6,7 @@ library("dplyr")
 library("knitr")
 library("DT")
 library("readxl")
+library("tidyverse")
 
 #import data from files
 gold_prices <- read.csv("Data\\Gold prices.csv")
@@ -144,6 +145,11 @@ bitcoin_mkpru <- rbind(bitcoin_mkpru, df)
 #remove unnecessary filter vectors
 rm(bitcoin_mkpru_f)
 
+bitcoin_mkpru <- bitcoin_mkpru %>%
+  pivot_wider(names_from = Date, values_from = MeanValue) %>%
+  mutate(Country = "World", Series = "Bitcoin Mkpru") %>%
+  select(Country, Series, everything())
+
 # ----------------------- trvou - Bitcoin USD Exchange Trade Volume --------------------------------------
 
 #change character to date
@@ -165,6 +171,11 @@ bitcoin_trvou <- rbind(bitcoin_trvou, df)
 #remove unnecessary filter vectors
 rm(bitcoin_trvou_f)
 
+bitcoin_trvou <- bitcoin_trvou %>%
+  pivot_wider(names_from = Date, values_from = MeanValue) %>%
+  mutate(Country = "World", Series = "Bitcoin Trvou") %>%
+  select(Country, Series, everything())
+
 # ----------------------- hrate - Bitcoin Hash Rate --------------------------------------
 
 bitcoin_hrate$Date <- as.Date(bitcoin_hrate$Date)
@@ -184,6 +195,11 @@ bitcoin_hrate <- rbind(bitcoin_hrate, df)
 
 #remove unnecessary filter vectors
 rm(bitcoin_hrate_f)
+
+bitcoin_hrate <- bitcoin_hrate %>%
+  pivot_wider(names_from = Date, values_from = MeanValue) %>%
+  mutate(Country = "World", Series = "Bitcoin Hrate") %>%
+  select(Country, Series, everything())
 
 # ----------------------- diff - Bitcoin Hash Rate --------------------------------------
 
@@ -205,12 +221,18 @@ bitcoin_diff <- rbind(bitcoin_diff, df)
 #remove unnecessary filter vectors
 rm(bitcoin_diff_f, df, Date, MeanValue)
 
+bitcoin_diff <- bitcoin_diff %>%
+  pivot_wider(names_from = Date, values_from = MeanValue) %>%
+  mutate(Country = "World", Series = "Bitcoin Diff") %>%
+  select(Country, Series, everything())
+
 # -------------------------------- Change name of DF columns ---------------------------------------------
 
-#later on final data frame
-colnames(wd_indicators_f) <- c("Country Name", "Indicator", "1971", "1972", "1973", "1974", "1975", "1976", "1977", "1978",
-                               "1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990",
-                               "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000")
+#change column  names on df wd_indicators
+colnames(wd_indicators) <- c("Country", "Series", "1995", "1996", "1997", "1998", "1999", "2000", "2001",
+                             "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010",
+                             "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018")
+
 
 
 #remove unnecessary filter vectors
