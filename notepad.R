@@ -72,6 +72,9 @@ spcomposite_f <- spcomposite %>%
 spcomposite <- spcomposite_f
 
 spcomposite_t <- as.data.frame(t(spcomposite))
+spcomposite_t <- setNames(data.frame(t(spcomposite[ , - 1])), spcomposite[ , 1])
+
+rm(spcomposite_t)
 
   mutate(as.data.frame(t(spcomposite)))
 
