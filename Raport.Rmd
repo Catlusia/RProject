@@ -1,0 +1,56 @@
+---
+title: "Analiza danychy światowych"
+author: "Alicja Kilińska"
+date: '2022-05-21'
+output: 
+  html_document: 
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Wstęp
+
+Executive summary
+
+# Wczytanie danych
+
+```{r DataImport, message=FALSE, warning=FALSE}
+
+# Modify global options in R - disable scientific notation
+options(scipen = 999)
+
+#Library Import
+library("readxl")
+library("ggplot2")
+library("plotly")
+library("dplyr")
+library("knitr")
+library("DT")
+library("readxl")
+library("tidyverse")
+
+#import data from files
+gold_prices <- read.csv("Data\\Gold prices.csv")
+wd_indicators <- read_excel("Data\\World_Development_Indicators.xlsx")
+bitcoin_diff <- read.csv("Data\\BCHAIN-DIFF.csv")
+bitcoin_hrate <- read.csv("Data\\BCHAIN-HRATE.csv")
+bitcoin_mkpru <- read.csv("Data\\BCHAIN-MKPRU.csv")
+bitcoin_trvou <- read.csv("Data\\BCHAIN-TRVOU.csv")
+
+```
+
+# Analiza Atrybutów
+
+```{r Analiza, message=FALSE, warning=FALSE}
+
+#Data analysis
+kable(summary(gold_prices))
+
+```
+
+# Analiza wybranego podzbioru danych
