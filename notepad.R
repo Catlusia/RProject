@@ -18,188 +18,146 @@ bitcoin_hrate <- read.csv("Data\\BCHAIN-HRATE.csv")
 bitcoin_mkpru <- read.csv("Data\\BCHAIN-MKPRU.csv")
 bitcoin_trvou <- read.csv("Data\\BCHAIN-TRVOU.csv")
 
-?read_excel
-
-rm(wd_indicators)
-
 # Modify global options in R - disable scientific notation
 options(scipen = 999)
 
 # ----------------------------------- Indicators ----------------------------------------------------
 #filter vector for indicators
-wd_series <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP.TOTL.FE.IN", 
-                      "SP.DYN.LE00.IN", "SL.UEM.TOTL.NE.ZS", "SL.UEM.ADVN.ZS", "SP.DYN.TO65.FE.ZS",
-                      "SP.DYN.TO65.MA.ZS", "SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5",
-                      "SH.STA.DIAB.ZS")
+#wd_series <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP.TOTL.FE.IN", 
+                     # "SP.DYN.LE00.IN", "SL.UEM.TOTL.NE.ZS", "SL.UEM.ADVN.ZS", "SP.DYN.TO65.FE.ZS",
+                      #"SP.DYN.TO65.MA.ZS", "SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5",
+                      #"SH.STA.DIAB.ZS")
 
-#'%ni%' <- Negate("%in%")
+wd_series <- c("SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5")
 
 #filter vector for countries
-wd_country <- c("CAN", "CHL", "CHN", "COL", "CZE", "ETH", "FRA", "DEU", "GHA", "HKG", 
-                      "IND", "JPN", "KOR", "NPL", "POL", "QAT", "RUS", "SAU", "USA")
-
-wd_filter <- c(5:55)
-
-wd_indicators_f <- wd_indicators %>%
-  select(`1995 [YR1995]`:`2018 [YR2018]`)
+wd_country <- c("CHN", "DEU", "JPN", "POL", "QAT", "USA")
 
 wd_indicators_f <- wd_indicators %>%
   gather("year", "value", 5:ncol(wd_indicators)) %>%
-  mutate(year = substr(year, 1, 4)) %>%
+  mutate(Year = substr(year, 1, 4)) %>% 
   mutate_if(is.numeric, round, 1) %>%
-  filter(`Series Code` %in% wd_series, `Country Code` %in% wd_country) %>%
-  select(`Country Name`, `Series Name`, `year`)
-
-
-wd_indicators_f <- wd_indicators %>%
-  mutate_at(wd_filter, as.numeric)
+  mutate(Year = as.numeric(Year))  %>%
+  filter(`Series Code` %in% wd_series, `Country Code` %in% wd_country, !is.na(value)) %>%
+  filter(Year >= "1995" & Year <= "2018")  %>%
+  select(`Country Name`, `Series Name`, `Year`, value)
 
 wd_indicators <- wd_indicators_f
 
 #remove unnecessary filter vectors
-rm(wd_indicators_f, wd_filter, wd_country, wd_series)
+rm(wd_country, wd_series, wd_indicators_f)
+
+summary(wd_indicators)
 
 # ----------------------------------------- Gold Prices --------------------------------------------------
-#Change character to date
-#gold_prices$Date <- as.Date(gold_prices$Date)
 
 #mean from USD A.M. and USD P.M.
 gold_prices_f <- gold_prices %>%
   select(Date, USD..AM., USD..PM.) %>%
-  mutate(Usd = rowMeans(select(., USD..AM., USD..PM.), na.rm = TRUE)) %>%
-  mutate(Date=ymd(Date))
-  group_by(Date) %>%
-  summarise(GoldPriceinEuro = mean(Usd)) %>%
-  mutate(GoldPriceinEuro = round(GoldPriceinEuro, 1)) %>%
+  mutate(GoldPriceUsd = rowMeans(select(., USD..AM., USD..PM.), na.rm = TRUE)) %>%
+  mutate(Date = ymd(Date)) %>%
+  mutate(GoldPriceUsd = round(GoldPriceUsd, 1)) %>%
   filter(Date >= "1995-01-01" & Date <= "2018-12-31") %>%
+  select(Date, GoldPriceUsd) %>%
   arrange(desc(Date))
 
 #assign to original df
 gold_prices <- gold_prices_f
 rm(gold_prices_f)
 
-# ------------------------------ mkpru - Bitcoin Market Price USD ----------------------------------------
+summary(gold_prices)
 
-#change character to date
-#bitcoin_mkpru$Date <- as.Date(bitcoin_mkpru$Date)
-bitcoin_mkpru$Value <- as.Date(bitcoin_mkpru$Value)
+# ------------------------------ mkpru - Bitcoin Market Price USD ----------------------------------------
 
 bitcoin_mkpru_f <- bitcoin_mkpru %>%
   select(Date, Value) %>%
-  #mutate(bitcoin_mkpru, Date = format(Date, format = "%Y")) %>%
-  mutate(Date=ymd(Date)) %>%
-  group_by(Date) %>%
-  summarise(MeanValue = mean(Value)) %>%
-  mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date <= "2018-12-31") %>%
-  arrange(desc(Date))
+  mutate(Year = ymd(Date)) %>%
+  mutate(bitcoin_mkpru, Year = format(Year, format = "%Y")) %>%
+  mutate(Value = round(Value, 1)) %>%
+  filter(Year >= "2010" & Year <= "2018") %>%
+  select(Year, value = Value) %>%
+  arrange(desc(Year))
 
 #assign to original df
 bitcoin_mkpru <- bitcoin_mkpru_f
-bitcoin_mkpru <- rbind(bitcoin_mkpru, df)
 
 #remove unnecessary filter vectors
 rm(bitcoin_mkpru_f)
 
-#bitcoin_mkpru <- bitcoin_mkpru %>%
- # pivot_wider(names_from = Date, values_from = MeanValue) %>%
-  #mutate(Country = "World", Series = "Bitcoin Mkpru") %>%
-  #select(Country, Series, everything())
+summary(bitcoin_mkpru)
 
 # ----------------------- trvou - Bitcoin USD Exchange Trade Volume --------------------------------------
 
-#change character to date
-#bitcoin_trvou$Date <- as.Date(bitcoin_trvou$Date)
-bitcoin_trvou$Value <- as.Date(bitcoin_trvou$Value)
-
 bitcoin_trvou_f <- bitcoin_trvou %>%
   select(Date, Value) %>%
-  mutate(Date=ymd(Date)) %>%
-  #mutate(bitcoin_trvou, Date = format(Date, format = "%Y")) %>%
-  group_by(Date) %>%
-  summarise(MeanValue = mean(Value)) %>%
-  mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date <= "2018-12-31") %>%
+  mutate(Date = ymd(Date)) %>%
+  mutate(Value = round(Value, 1)) %>%
+  filter(Date >= "2010-01-01" & Date <= "2018-12-31") %>%
   arrange(desc(Date))
 
 #assign to original df
 bitcoin_trvou <- bitcoin_trvou_f
-bitcoin_trvou <- rbind(bitcoin_trvou, df)
 
 #remove unnecessary filter vectors
 rm(bitcoin_trvou_f)
 
-#bitcoin_trvou <- bitcoin_trvou %>%
-  #pivot_wider(names_from = Date, values_from = MeanValue) %>%
- # mutate(Country = "World", Series = "Bitcoin Trvou") %>%
-  #select(Country, Series, everything())
+summary(bitcoin_trvou)
 
 # ----------------------- hrate - Bitcoin Hash Rate --------------------------------------
 
-#bitcoin_hrate$Date <- as.Date(bitcoin_hrate$Date)
-bitcoin_hrate$Value <- as.numeric(bitcoin_hrate$Value)
-
 bitcoin_hrate_f <- bitcoin_hrate %>%
   select(Date, Value) %>%
-  mutate(Data=ymd(Date)) %>%
-  #mutate(bitcoin_hrate, Date = format(Date, format = "%Y")) %>%
-  group_by(Date) %>%
-  summarise(MeanValue = mean(Value)) %>%
-  mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date <= "2018") %>%
+  mutate(Date = ymd(Date)) %>%
+  mutate(Value = round(Value, 1)) %>%
+  filter(Date >= "2010-01-01" & Date <= "2018-12-31") %>%
   arrange(desc(Date))
 
 #assign to original df
 bitcoin_hrate <- bitcoin_hrate_f
-bitcoin_hrate <- rbind(bitcoin_hrate, df)
 
 #remove unnecessary filter vectors
 rm(bitcoin_hrate_f)
 
-#bitcoin_hrate <- bitcoin_hrate %>%
-  #pivot_wider(names_from = Date, values_from = MeanValue) %>%
-  #mutate(Country = "World", Series = "Bitcoin Hrate") %>%
-  #select(Country, Series, everything())
+summary(bitcoin_hrate)
 
 # ----------------------- diff - Bitcoin Hash Rate --------------------------------------
 
-#bitcoin_diff$Date <- as.Date(bitcoin_diff$Date)
-bitcoin_diff$Value <- as.numeric(bitcoin_diff$Value)
-
 bitcoin_diff_f <- bitcoin_diff %>%
   select(Date, Value) %>%
-  mutate(Date=ymd(Date)) %>%
-  #mutate(bitcoin_diff, Date = format(Date, format = "%Y")) %>%
-  group_by(Date) %>%
-  summarise(MeanValue = mean(Value)) %>%
-  mutate(MeanValue = round(MeanValue, 2)) %>%
-  filter(Date <= "2018-12-31") %>%
+  mutate(Date = ymd(Date)) %>%
+  mutate(Value = round(Value, 1)) %>%
+  filter(Date >= "2010-01-01" & Date <= "2018-12-31") %>%
   arrange(desc(Date))
 
 #assign to original df
 bitcoin_diff <- bitcoin_diff_f
-#bitcoin_diff <- rbind(bitcoin_diff, df)
 
 #remove unnecessary filter vectors
-#rm(bitcoin_diff_f, df, Date, MeanValue)
+rm(bitcoin_diff_f)
 
-#bitcoin_diff <- bitcoin_diff %>%
- # pivot_wider(names_from = Date, values_from = MeanValue) %>%
-  #mutate(Country = "World", Series = "Bit coin Diff") %>%
- # select(Country, Series, everything())
-
-# -------------------------------- Final data ---------------------------------------------
-
-#merge all data about bitcoin and gold prices
-all_data <- rbind(bitcoin_diff, bitcoin_hrate, bitcoin_mkpru, bitcoin_trvou, gold_prices)
-#all_data <- all_data %>%
- # mutate_if(is.character, as.numeric) %>%
-  #mutate_all(round, 1)
-
-summary(all_data)
-#remove unnecessary data
-rm(bitcoin_diff, bitcoin_hrate, bitcoin_mkpru, bitcoin_trvou, gold_prices)
+summary(bitcoin_diff)
 
 # ------------------------------------- Plot -----------------------------------------------
 
-ggplot(data=)
+germany <- wd_indicators %>%
+  filter(`Country Name` == "Germany")
+
+Suicedes <- wd_indicators %>%
+  filter(wd_indicators$`Series Name` == "Suicide mortality rate (per 100,000 population)")
+
+
+rm(germany)
+
+ggplot(data = bitcoin_mkpru, aes(x = Date, y = Value)) +
+  geom_line(size = 1)
+
+plot1 <- ggplot(data = Suicedes, aes(x = Year, y = value, fill = `Country Name`))
+
+plot1 +
+  geom_col() + 
+  facet_grid(. ~ `Country Name`) +
+  theme(axis.text.x = element_text(angle = 90))
+
+plot1 + geom_line(data = bitcoin_mkpru)
+
+#skleić by year dataframe wd i bitcoin
