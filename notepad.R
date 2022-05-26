@@ -1,4 +1,3 @@
-install.packages("tidyr")
 library("readxl")
 library("ggplot2")
 library("plotly")
@@ -23,15 +22,11 @@ options(scipen = 999)
 
 # ----------------------------------- Indicators ----------------------------------------------------
 #filter vector for indicators
-#wd_series <- c("SP.URB.TOTL", "SP.POP.TOTL", "SP.POP.TOTL.MA.IN", "SP.POP.TOTL.FE.IN", 
-                     # "SP.DYN.LE00.IN", "SL.UEM.TOTL.NE.ZS", "SL.UEM.ADVN.ZS", "SP.DYN.TO65.FE.ZS",
-                      #"SP.DYN.TO65.MA.ZS", "SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5",
-                      #"SH.STA.DIAB.ZS")
 
-wd_series <- c("SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5")
+wd_series <- c("SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5", "SP.URB.TOTL")
 
 #filter vector for countries
-wd_country <- c("CHN", "DEU", "JPN", "POL", "QAT", "USA")
+wd_country <- c("DEU", "JPN", "POL", "FRA", "USA")
 
 wd_indicators_f <- wd_indicators %>%
   gather("year", "value", 5:ncol(wd_indicators)) %>%
@@ -57,7 +52,7 @@ gold_prices_f <- gold_prices %>%
   mutate(GoldPriceUsd = rowMeans(select(., USD..AM., USD..PM.), na.rm = TRUE)) %>%
   mutate(Date = ymd(Date)) %>%
   mutate(GoldPriceUsd = round(GoldPriceUsd, 1)) %>%
-  filter(Date >= "1995-01-01" & Date <= "2018-12-31") %>%
+  filter(Date >= "2014-01-01" & Date <= "2018-12-31") %>%
   select(Date, GoldPriceUsd) %>%
   arrange(desc(Date))
 
@@ -72,10 +67,13 @@ summary(gold_prices)
 bitcoin_mkpru_f <- bitcoin_mkpru %>%
   select(Date, Value) %>%
   mutate(Year = ymd(Date)) %>%
-  mutate(bitcoin_mkpru, Year = format(Year, format = "%Y")) %>%
+  #mutate(bitcoin_mkpru, Year = format(Year, format = "%Y")) %>%
+  #group_by(Year) %>%
+  #summarise(MeanValue = mean(Value)) %>%
+  #mutate(Year = as.numeric(Year))  %>%
   mutate(Value = round(Value, 1)) %>%
-  filter(Year >= "2010" & Year <= "2018") %>%
-  select(Year, value = Value) %>%
+  filter(Year >= "2014-01-01" & Year <= "2018-12-31") %>%
+  select(Year, Value) %>%
   arrange(desc(Year))
 
 #assign to original df
@@ -139,25 +137,41 @@ summary(bitcoin_diff)
 
 # ------------------------------------- Plot -----------------------------------------------
 
-germany <- wd_indicators %>%
-  filter(`Country Name` == "Germany")
-
-Suicedes <- wd_indicators %>%
+# Suicides
+Suicides <- wd_indicators %>%
   filter(wd_indicators$`Series Name` == "Suicide mortality rate (per 100,000 population)")
 
+# Urban population
+UrbanPopulation <- wd_indicators %>%
+  filter(wd_indicators$`Series Name` == "Urban population") %>%
+  filter(Year >= "2000")
 
-rm(germany)
+# Suicides rate on urban population
+Suicides$value <- UrbanPopulation$value * (Suicides$value / 100)
 
-ggplot(data = bitcoin_mkpru, aes(x = Date, y = Value)) +
-  geom_line(size = 1)
+# Plot
+g <- ggplot() + 
+  geom_col(data = UrbanPopulation, aes(x = Year, y = value, fill = 'Country Name')) + 
+  facet_grid(. ~ `Country Name`, scales = "free") +
+  geom_line(data = Suicides, aes(x = Year, y = value), size = 1, color = "Black")
 
-plot1 <- ggplot(data = Suicedes, aes(x = Year, y = value, fill = `Country Name`))
-
-plot1 +
-  geom_col() + 
-  facet_grid(. ~ `Country Name`) +
-  theme(axis.text.x = element_text(angle = 90))
-
-plot1 + geom_line(data = bitcoin_mkpru)
-
-#skleić by year dataframe wd i bitcoin
+#title of the plot)
+g + 
+  xlab("Year") + 
+  ylab("Number of people") +
+  ggtitle("Suicide mortality vs Urban population") +
+  #label formatting
+  theme_bw() +
+  theme(axis.title.x = element_text(colour = "DarkGreen", size = 15),
+        axis.title.y = element_text(colour = "DarkGreen", size = 15),
+        #thick mark formatting
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
+        #legend formatting
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 11),
+        legend.justification = c(1,1),
+        plot.title = element_text(colour = "DarkBlue",
+                                  size = 25,
+                                  hjust = 0.5))
+ggplotly(g)

@@ -5,7 +5,9 @@ date: '2022-05-21'
 output: 
   html_document: 
     toc: yes
+    toc_float: yes
     number_sections: yes
+    theme: sandstone
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
@@ -24,7 +26,7 @@ Executive summary
 # Modify global options in R - disable scientific notation
 options(scipen = 999)
 
-#Library Import
+# Library Import
 library("readxl")
 library("ggplot2")
 library("plotly")
@@ -34,13 +36,8 @@ library("DT")
 library("readxl")
 library("tidyverse")
 
-#import data from files
-gold_prices <- read.csv("Data\\Gold prices.csv")
-wd_indicators <- read_excel("Data\\World_Development_Indicators.xlsx")
-bitcoin_diff <- read.csv("Data\\BCHAIN-DIFF.csv")
-bitcoin_hrate <- read.csv("Data\\BCHAIN-HRATE.csv")
-bitcoin_mkpru <- read.csv("Data\\BCHAIN-MKPRU.csv")
-bitcoin_trvou <- read.csv("Data\\BCHAIN-TRVOU.csv")
+# Import data from files
+wd_indicators <- read_excel("Data\\World_Development_Indicators.xlsx", na=c("", ".."))
 
 ```
 
@@ -49,7 +46,7 @@ bitcoin_trvou <- read.csv("Data\\BCHAIN-TRVOU.csv")
 ```{r Analiza, message=FALSE, warning=FALSE}
 
 #Data analysis
-kable(summary(gold_prices))
+kable(summary(wd_indicators))
 
 ```
 
