@@ -10,7 +10,7 @@ output:
     theme: sandstone
 ---
 
-```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+```{r Setup, include=FALSE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 ```
@@ -43,11 +43,145 @@ wd_indicators <- read_excel("Data\\World_Development_Indicators.xlsx", na=c("", 
 
 # Analiza Atrybutów
 
-```{r Analiza, message=FALSE, warning=FALSE}
+```{r AttribAnalis, message=FALSE, warning=FALSE, echo = FALSE}
 
-#Data analysis
+# ----------------------------------- Indicators ----------------------------------------------------
+#filter vector for indicators
+wd_series <- c("SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5", "SP.URB.TOTL")
+
+#filter vector for countries
+wd_country <- c("DEU", "JPN", "POL", "FRA", "USA")
+
+wd_indicators_f <- wd_indicators %>%
+  gather("year", "value", 5:ncol(wd_indicators)) %>%
+  mutate(Year = substr(year, 1, 4)) %>% 
+  mutate_if(is.numeric, round, 1) %>%
+  mutate(Year = as.numeric(Year))  %>%
+  filter(`Series Code` %in% wd_series, `Country Code` %in% wd_country, !is.na(value)) %>%
+  filter(Year >= "1995" & Year <= "2018")  %>%
+  select(`Country Name`, `Series Name`, `Year`, value)
+
+wd_indicators <- wd_indicators_f
+
+#remove unnecessary filter vectors
+rm(wd_country, wd_series, wd_indicators_f)
+
 kable(summary(wd_indicators))
 
 ```
 
 # Analiza wybranego podzbioru danych
+
+Analiza przeprowadzona dla krajów:
+
+- Niemcy,
+- Japonia,
+- Polska,
+- Francja,
+- USA.
+
+Wartości:
+
+- Popilacja terenów zurbanizowanych,
+- Ilość samobójst na 100,000 osób.
+
+Zakres lat: 1995 - 2018
+
+Top sześć wartości:
+
+```{r ChoosAnalis, message=FALSE, warning=FALSE, echo = FALSE}
+
+kable(head(wd_indicators))
+
+```
+# Wymagane obliczenia
+
+Wyliczenie dla każdego z krajów z analizy liczby osób popełniających samobójstwo na podstawie wartości procentowej na 100,000 osób z populacji.
+
+```{r Results, message=FALSE, warning=FALSE}
+
+# Suicides
+Suicides <- wd_indicators %>%
+  filter(wd_indicators$`Series Name` == "Suicide mortality rate (per 100,000 population)")
+
+# Urban population
+UrbanPopulation <- wd_indicators %>%
+  filter(wd_indicators$`Series Name` == "Urban population") %>%
+  filter(Year >= "2000")
+
+# Suicides rate on urban population
+Suicides$value <- UrbanPopulation$value * (Suicides$value / 100)
+
+```
+
+# Wykresy
+
+Kraje brane pod uwagę oraz ilosć populacji - zbiorczo
+
+```{r Plot, message=FALSE, warning=FALSE, echo = FALSE}
+
+#First plot
+h <- ggplot() + 
+  geom_col(data = UrbanPopulation, aes(x = Year, y = value, fill = `Country Name`)) +
+  geom_point(data = Suicides, aes(x = Year, y = value, color = `Series Name`), size = 1)
+
+
+h + 
+  xlab("Year") + 
+  ylab("Number of people") +
+  ggtitle("Suicide mortality vs Urban population") +
+  #label formatting
+  theme_bw() +
+  theme(axis.title.x = element_text(colour = "DarkGreen", size = 15),
+        axis.title.y = element_text(colour = "DarkGreen", size = 15),
+        #thick mark formatting
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
+        #legend formatting
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 11),
+        legend.position="right",
+        plot.title = element_text(colour = "DarkBlue",
+                                  size = 20,
+                                  hjust = 0.5)) +
+  scale_fill_brewer(palette = "Set2")
+
+# Second Plot
+g <- ggplot() + 
+  geom_col(data = UrbanPopulation, aes(x = Year, y = value, fill = `Series Name`)) +
+  geom_line(data = Suicides, aes(x = Year, y = value, color = `Series Name`), size = 1)  +
+  facet_grid(. ~ `Country Name`, scales = "free")
+
+
+# Adjust plot
+g + 
+  xlab("Year") + 
+  ylab("Number of people") +
+  ggtitle("Suicide mortality vs Urban population") +
+  #label formatting
+  theme_bw() +
+  theme(axis.title.x = element_text(colour = "DarkGreen", size = 15),
+        axis.title.y = element_text(colour = "DarkGreen", size = 15),
+        #thick mark formatting
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
+        #legend formatting
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 11),
+        legend.position="bottom",
+        plot.title = element_text(colour = "DarkBlue",
+                                  size = 20,
+                                  hjust = 0.5)) +
+  scale_fill_brewer(palette = "Paired")
+
+```
+
+# Wykresy multimedialny
+
+```{r PlotMulti, message=FALSE, warning=FALSE, echo = FALSE}
+
+ggplotly(h)
+
+ggplotly(g)
+
+```

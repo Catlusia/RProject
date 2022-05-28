@@ -22,7 +22,6 @@ options(scipen = 999)
 
 # ----------------------------------- Indicators ----------------------------------------------------
 #filter vector for indicators
-
 wd_series <- c("SH.STA.SUIC.P5", "SH.STA.SUIC.FE.P5", "SH.STA.SUIC.MA.P5", "SP.URB.TOTL")
 
 #filter vector for countries
@@ -149,13 +148,40 @@ UrbanPopulation <- wd_indicators %>%
 # Suicides rate on urban population
 Suicides$value <- UrbanPopulation$value * (Suicides$value / 100)
 
-# Plot
-g <- ggplot() + 
-  geom_col(data = UrbanPopulation, aes(x = Year, y = value, fill = 'Country Name')) + 
-  facet_grid(. ~ `Country Name`, scales = "free") +
-  geom_line(data = Suicides, aes(x = Year, y = value), size = 1, color = "Black")
+#First plot
+h <- ggplot() + 
+  geom_col(data = UrbanPopulation, aes(x = Year, y = value, fill = `Country Name`)) +
+  geom_point(data = Suicides, aes(x = Year, y = value, color = `Series Name`), size = 1)
 
-#title of the plot)
+
+h + 
+  xlab("Year") + 
+  ylab("Number of people") +
+  ggtitle("Suicide mortality vs Urban population") +
+  #label formatting
+  theme_bw() +
+  theme(axis.title.x = element_text(colour = "DarkGreen", size = 15),
+        axis.title.y = element_text(colour = "DarkGreen", size = 15),
+        #thick mark formatting
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
+        #legend formatting
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 11),
+        legend.position="bottom",
+        plot.title = element_text(colour = "DarkBlue",
+                                  size = 25,
+                                  hjust = 0.5)) +
+  scale_fill_brewer(palette = "Set2")
+
+# Second Plot
+g <- ggplot() + 
+  geom_col(data = UrbanPopulation, aes(x = Year, y = value, fill = `Series Name`)) +
+  geom_line(data = Suicides, aes(x = Year, y = value, color = `Series Name`), size = 1)  +
+  facet_grid(. ~ `Country Name`, scales = "free")
+
+
+# Adjust plot
 g + 
   xlab("Year") + 
   ylab("Number of people") +
@@ -170,8 +196,10 @@ g +
         #legend formatting
         legend.title = element_text(size = 15),
         legend.text = element_text(size = 11),
-        legend.justification = c(1,1),
+        legend.position="bottom",
         plot.title = element_text(colour = "DarkBlue",
                                   size = 25,
-                                  hjust = 0.5))
+                                  hjust = 0.5)) +
+  scale_fill_brewer(palette = "Paired")
+
 ggplotly(g)
