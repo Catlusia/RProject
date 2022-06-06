@@ -17,7 +17,22 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Wstęp
 
-Executive summary
+Analiza przeprowadzona dla krajów:
+
+- Niemcy,
+- Japonia,
+- Polska,
+- Francja,
+- USA.
+
+Wartości:
+
+- Populacja terenów zurbanizowanych,
+- Ilość samobójstw na 100,000 osób.
+
+Zakres lat: 1995 - 2018
+
+W krajach Francja, Niemcy oraz Polska ilość samobójstw utrzymuje się na stałym poziomie, niezależnie od ilości populacji zamieszkującej tereny zurbanizowane. W Japonii ilość samobójstw maleje, natomiast populacja w miastach zurbanizowanych rośnie, jak widać Japonia skutecznie radzi sobie z problemem samobójstw. W Stanach Zjednoczonych widać zależność pomiędzy ilością populacji terenów zurbanizowanych, a ilością popełnianych samobójstw.
 
 # Wczytanie danych
 
@@ -82,8 +97,8 @@ Analiza przeprowadzona dla krajów:
 
 Wartości:
 
-- Popilacja terenów zurbanizowanych,
-- Ilość samobójst na 100,000 osób.
+- Populacja terenów zurbanizowanych,
+- Ilość samobójstw na 100,000 osób.
 
 Zakres lat: 1995 - 2018
 
@@ -176,7 +191,7 @@ g +
 
 ```
 
-# Wykresy multimedialny
+# Wykresy multimedialne
 
 ```{r PlotMulti, message=FALSE, warning=FALSE, echo = FALSE}
 
