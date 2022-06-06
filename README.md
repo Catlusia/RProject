@@ -1,6 +1,7 @@
 # RProject
 
 #Raport.Rmd
+
 Analysis conducted for countries:
 
 - Germany,
